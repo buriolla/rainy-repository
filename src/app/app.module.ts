@@ -3,10 +3,12 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { CountDownTimerComponent } from './controls/count-down-timer/count-down-timer.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CountDownTimerComponent
   ],
   imports: [
     BrowserModule,
