@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CountDownTimerComponent } from './controls/count-down-timer/count-down-timer.component';
+import { SwPush } from '@angular/service-worker';
 
 
 @Component({
@@ -8,11 +9,11 @@ import { CountDownTimerComponent } from './controls/count-down-timer/count-down-
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements AfterViewInit {
-  
+export class AppComponent implements OnInit, AfterViewInit {
+
 
   @ViewChild(CountDownTimerComponent) countDownTimer: CountDownTimerComponent;
-  
+
 
   public pomodoroTime = 15;
   public shortBreakTime = 300;
@@ -26,10 +27,15 @@ export class AppComponent implements AfterViewInit {
   public rainyDay = null;
   public timeLimit;
   public isOnPomodoroBreak = false;
-  private onTimerEndedSubscription: Subscription;
+  public isEnabled = this.swPush.isEnabled;
+  public isGranted = Notification.permission === 'granted';
 
-  
-  constructor(private cdr: ChangeDetectorRef) {
+
+  constructor(private cdr: ChangeDetectorRef, private swPush: SwPush) {
+  }
+
+  ngOnInit(): void {
+
   }
 
   ngAfterViewInit(): void {
@@ -43,21 +49,22 @@ export class AppComponent implements AfterViewInit {
   }
 
   public pomodoroSteper() {
-    if(!this.isOnPomodoroBreak) {
+    if (!this.isOnPomodoroBreak) {
       this.pomodoroCount++;
       this.timeLimit = this.pomodoroTime;
     } else {
-      if(this.pomodoroCount == 4) {
+      if (this.pomodoroCount == 4) {
         this.timeLimit = this.longBreakTime;
       } else {
         this.timeLimit = this.shortBreakTime;
       }
     }
+
     this.countDownTimer.timeLimit = this.timeLimit;
     this.cdr.detectChanges();
   }
 
-  startTimer() {
+  public startTimer() {
     this.countDownTimer.startTimer();
     this.startAudio(this.rainAudioSource, true);
     this.isTimerStarted = true;
@@ -76,7 +83,4 @@ export class AppComponent implements AfterViewInit {
     this.audio.loop = isLoop;
     this.audio.play();
   }
-
-
-
 }

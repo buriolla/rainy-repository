@@ -1,5 +1,5 @@
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 @Component({
@@ -7,20 +7,12 @@ import { Observable, Subject } from 'rxjs';
   templateUrl: './count-down-timer.component.html',
   styleUrls: ['./count-down-timer.component.scss']
 })
-export class CountDownTimerComponent implements OnInit {
+export class CountDownTimerComponent implements AfterViewInit {
 
   @Input() timeLimit: any;
-  @ViewChild("soundElement") soundElement: ElementRef;
 
   private timerEndSubject = new Subject<any>();
-
-  constructor() {
-  }
-
-  ngOnInit(): void {
-    this.timeLeft = this.timeLimit;
-  }
-
+  private componentLoadedSubject = new Subject();
   public readonly FULL_DASH_ARRAY = 283;
   public readonly WARNING_THRESHOLD = 10;
   public readonly ALERT_THRESHOLD = 5;
@@ -44,7 +36,13 @@ export class CountDownTimerComponent implements OnInit {
   public remainingPathColor = this.COLOR_CODES.info.color;
   public circleDasharray: any = 283;
   public isTimerStarted: boolean = false;
-  public audioSrc = '';
+
+  constructor() {
+  }
+
+  ngAfterViewInit(): void {
+    this.timeLeft = this.timeLimit;
+  }
 
   public onTimesUp() {
     clearInterval(this.timerInterval);
@@ -52,6 +50,10 @@ export class CountDownTimerComponent implements OnInit {
 
   public onTimerEnd() : Observable<any> {
     return this.timerEndSubject.asObservable();
+  }
+
+  public onTimerLoaded() : Observable<any> {
+    return this.componentLoadedSubject.asObservable();
   }
 
   public startTimer() {
@@ -77,18 +79,21 @@ export class CountDownTimerComponent implements OnInit {
     this.remainingPathColor = this.COLOR_CODES.info.color;
     this.circleDasharray = 283;
     this.isTimerStarted = false;
-    this.audioSrc = '';
   }
 
   public formatTime(time) {
-    const minutes = Math.floor(time / 60);
-    let seconds: any = time % 60;
-
-    if (seconds < 10) {
-      seconds = `0${seconds}`;
+    if(time > 0) {
+      const minutes = Math.floor(time / 60);
+      let seconds: any = time % 60;
+  
+      if (seconds < 10) {
+        seconds = `0${seconds}`;
+      }
+  
+      return `${minutes}:${seconds}`;
+    } else {
+      return "00:00"
     }
-
-    return `${minutes}:${seconds}`;
   }
 
   public setRemainingPathColor(timeLeft) {
